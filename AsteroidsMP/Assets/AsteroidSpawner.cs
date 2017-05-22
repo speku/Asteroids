@@ -11,16 +11,11 @@ public class AsteroidSpawner : MonoBehaviour {
     public float velocityMin = 1;
     public float delay = 2;
     public GameObject asteroid;
-    float hLimit;
-    float vLimit;
     public float cushion = 0.1f;
 
     List<GameObject> asteroids;
 
 	void Start () {
-        var limitVec = Camera.main.ScreenToWorldPoint(Vector2.zero) * -1;
-        hLimit = limitVec.x + cushion;
-        vLimit = limitVec.y + cushion;
         asteroids = Enumerable.Range(0, max).Select(_ => Spawn()).ToList();
         //StartCoroutine(Respawn());
 	}
@@ -28,8 +23,10 @@ public class AsteroidSpawner : MonoBehaviour {
     void Setup(GameObject go)
     {
         go.SetActive(true);
+        go.GetComponent<SpriteRenderer>().enabled = true;
         var rb = go.GetComponent<Rigidbody2D>();
-        rb.position = new Vector2(Random.Range(-hLimit, hLimit), (Random.value <= 0.5 ? -1 : 1) * vLimit);
+        var xy = Utility.SpawnArea(cushion);
+        rb.position = new Vector2(Random.Range(-xy.x, xy.x), (Random.value <= 0.5 ? -1 : 1) * xy.y);
         rb.rotation = Random.Range(0, 180);
         go.GetComponent<Rigidbody2D>().velocity = go.transform.up * Random.Range(velocityMin, velocityMax);
      
@@ -37,7 +34,8 @@ public class AsteroidSpawner : MonoBehaviour {
 
     GameObject Spawn()
     {
-        var go = Instantiate(asteroid, new Vector2(Random.Range(-hLimit, hLimit), (Random.value <= 0.5 ? -1 : 1) * vLimit), Quaternion.Euler(0, 0, Random.Range(0, 180)));
+        var xy = Utility.SpawnArea(cushion);
+        var go = Instantiate(asteroid, new Vector2(Random.Range(-xy.x, xy.x), (Random.value <= 0.5 ? -1 : 1) * xy.y), Quaternion.Euler(0, 0, Random.Range(0, 180)));
         Setup(go);
         return go;
     }

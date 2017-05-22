@@ -4,21 +4,10 @@ using UnityEngine;
 
 public class Loop : MonoBehaviour {
 
-    Rigidbody2D rb;
-    Camera cam;
-    [HideInInspector]
-    public float hLimit;
-    [HideInInspector]
-    public float vLimit;
     public float cushion = 1;
     public float delay = 0.3f;
 
 	void Start () {
-        cam = Camera.main;
-        rb = GetComponent<Rigidbody2D>();
-        var limitVec = cam.ScreenToWorldPoint(Vector2.zero) * -1;
-        hLimit = limitVec.x + cushion;
-        vLimit = limitVec.y + cushion;
         StartCoroutine(Looping());
     }
 
@@ -26,32 +15,27 @@ public class Loop : MonoBehaviour {
     {
         for (;;)
         {
-            if (transform.position.x < -hLimit)
+            var rb = GetComponent<Rigidbody2D>();
+            var xy = Utility.SpawnArea(cushion);
+
+            if (transform.position.x < -xy.x)
             {
-                rb.MovePosition(new Vector2(hLimit, transform.position.y));
+                rb.MovePosition(new Vector2(xy.x, transform.position.y));
             }
-            else if (transform.position.x > hLimit)
+            else if (transform.position.x > xy.x)
             {
-                rb.MovePosition(new Vector2(-hLimit, transform.position.y));
+                rb.MovePosition(new Vector2(-xy.x, transform.position.y));
             }
 
-            if (transform.position.y < -vLimit)
+            if (transform.position.y < -xy.y)
             {
-                rb.MovePosition(new Vector2(transform.position.x, vLimit));
+                rb.MovePosition(new Vector2(transform.position.x, xy.y));
             }
-            else if (transform.position.y > vLimit)
+            else if (transform.position.y > xy.y)
             {
-                rb.MovePosition(new Vector2(transform.position.x, -vLimit));
+                rb.MovePosition(new Vector2(transform.position.x, -xy.y));
             }
             yield return new WaitForSeconds(delay);
         }
-    }
-	
-	void Update () {
-
-     
-
-
-
     }
 }
