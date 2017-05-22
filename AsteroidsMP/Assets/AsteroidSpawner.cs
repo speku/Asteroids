@@ -1,9 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+﻿using UnityEngine;
+using UnityEngine.Networking;
 
-public class AsteroidSpawner : MonoBehaviour {
+public class AsteroidSpawner : NetworkBehaviour {
 
     public int max = 5;
     public int min = 2;
@@ -13,39 +11,18 @@ public class AsteroidSpawner : MonoBehaviour {
     public GameObject asteroid;
     public float cushion = 0.1f;
 
-    List<GameObject> asteroids;
-
-	void Start () {
-        asteroids = Enumerable.Range(0, max).Select(_ => Spawn()).ToList();
-        //StartCoroutine(Respawn());
+	public override void OnStartServer () {
+        for (var i = 1; i <= max; i++) Spawn();
 	}
 
-    void Setup(GameObject go)
+    public void Spawn(GameObject prefab = null, Transform trans = null)
     {
-        go.SetActive(true);
-        go.GetComponent<SpriteRenderer>().enabled = true;
-        var rb = go.GetComponent<Rigidbody2D>();
+        if (!isServer) return;
         var xy = Utility.SpawnArea(cushion);
-        rb.position = new Vector2(Random.Range(-xy.x, xy.x), (Random.value <= 0.5 ? -1 : 1) * xy.y);
-        rb.rotation = Random.Range(0, 180);
+        var go = Instantiate(prefab ?? asteroid, trans == null ? new Vector2(Random.Range(-xy.x, xy.x), (Random.value <= 0.5 ? -1 : 1) * xy.y) : (Vector2) trans.position, Quaternion.Euler(0, 0, Random.Range(0, 180)));
         go.GetComponent<Rigidbody2D>().velocity = go.transform.up * Random.Range(velocityMin, velocityMax);
-     
-    }
-
-    GameObject Spawn()
-    {
-        var xy = Utility.SpawnArea(cushion);
-        var go = Instantiate(asteroid, new Vector2(Random.Range(-xy.x, xy.x), (Random.value <= 0.5 ? -1 : 1) * xy.y), Quaternion.Euler(0, 0, Random.Range(0, 180)));
-        Setup(go);
-        return go;
-    }
-
-    IEnumerator Respawn()
-    {
-        for (;;)
-        {
-            asteroids.Where(x => !x.activeSelf).ToList().ForEach(x => Setup(x));
-        }
+        go.GetComponent<Asteroid>().spawner = this;
+        NetworkServer.Spawn(go);
     }
 	
 }

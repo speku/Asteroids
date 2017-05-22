@@ -1,10 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Networking;
 
-public class Asteroid : MonoBehaviour {
+public class Asteroid : NetworkBehaviour {
 
     public float explosionDuration = 1;
+    [HideInInspector]
+    public AsteroidSpawner spawner;
+    public GameObject smallAsteroid;
+    public bool small = false;
     SpriteRenderer sr;
 
     private void Start()
@@ -14,8 +17,13 @@ public class Asteroid : MonoBehaviour {
 
     void Explode()
     {
-        sr.enabled = false;
-        gameObject.SetActive(false);
+        Destroy(gameObject);
+        if (isServer && !small)
+        {
+            spawner.Spawn();
+            spawner.Spawn(smallAsteroid, transform);
+            spawner.Spawn(smallAsteroid, transform);
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

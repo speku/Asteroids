@@ -1,31 +1,30 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.Networking;
 
-public class Projectile : MonoBehaviour {
+public class Projectile : NetworkBehaviour {
 
 
     public float velocity = 10;
     public float alive = 2;
-    PlayerController origin;
+    public PlayerController origin;
 
 
-    public Projectile Launch(Transform origin)
-    {
-        var go = Instantiate(this, origin.position, origin.rotation);
-        go.GetComponent<Rigidbody2D>().velocity = origin.up * velocity;
-        go.origin = origin.GetComponent<PlayerController>();
-        //go.audio.Play();
-        Destroy(go.gameObject, alive);
-        return go;
-    }
+    //public void Launch(Transform origin)
+    //{
+    //    if (!isServer) return;
+    //    var go = Instantiate(this, origin.position, origin.rotation);
+    //    go.GetComponent<Rigidbody2D>().velocity = origin.up * velocity;
+    //    go.origin = origin.GetComponent<PlayerController>();
+    //    NetworkServer.Spawn(go.gameObject);
+    //    Destroy(go.gameObject, alive);
+    //}
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.GetComponent<PlayerController>() == null)
         {
-            origin.IncrementScore();
             Destroy(gameObject);
+            if (isServer) origin.IncrementScore();
         }
     }
 

@@ -1,14 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class Loop : MonoBehaviour {
+public class Loop : NetworkBehaviour {
 
     public float cushion = 1;
     public float delay = 0.3f;
 
-	void Start () {
-        StartCoroutine(Looping());
+	void Start() {
+        if (isLocalPlayer || isServer) StartCoroutine(Looping());
     }
 
     IEnumerator Looping()
